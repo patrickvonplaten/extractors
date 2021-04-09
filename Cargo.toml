@@ -8,4 +8,5 @@ edition = "2018"
 
 [dependencies]
 rayon = "1.3"
-rayon-cond = { verson = "*", git = "https://github.com/nt10/rayon-cond" }
+rayon-cond = { verson = "*", git = "https://github.com/n1t0/rayon-cond" }
+hound = "3.4.0"
