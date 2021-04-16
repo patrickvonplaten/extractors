@@ -23,7 +23,7 @@ pub fn load_mp3_file(path: &str) -> (Vec<i16>, u32) {
     let mut sampling_rate: Option<u32> = None;
     loop {
         match decoder.next_frame() {
-            Ok(Frame { mut data, sample_rate, channels, .. }) => {
+            Ok(Frame { mut data, sample_rate, channels: _, .. }) => {
                 samples.append(&mut data);
 
                 sampling_rate = Some(sample_rate as u32);
@@ -55,14 +55,13 @@ fn get_extension_from_filename(filename: &str) -> Option<&str> {
 pub fn load_file(path: &str, format: Option<&str>) -> (Vec<i16>, u32) {
     // let allowed_formats = vec!["wav", "mp3", "flac"];
 
-    if format.is_none() {
-        format = get_extension_from_filename(path);
-    }
+    let extension = if format.is_none() { get_extension_from_filename(path) } else { format };
 
-    match format.unwrap() {
+    match extension.unwrap() {
         "wav" => load_wav_file(path),
         "mp3" => load_mp3_file(path),
         "flac" => load_flac_file(path),
+        _ => panic!("Make sure that format or file extension is one of ['wav', 'mp3', 'flac']"),
     }
 }
 
@@ -70,13 +69,12 @@ pub fn load_file(path: &str, format: Option<&str>) -> (Vec<i16>, u32) {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::f32::consts::PI;
 
     #[test]
     fn test_load_wav_file() {
         let filename = "./sine.wav";
 
-        let (samples, sample_rate) = load_wav_file(&filename);
+        let (samples, sample_rate) = load_file(&filename, None);
 
         assert_eq!(samples.len(), 44100);
         assert_eq!(sample_rate, 44100);
@@ -87,7 +85,7 @@ mod tests {
     fn test_load_mp3_file() {
         let filename = "./audio_files/clips/common_voice_ab_19904194.mp3";
 
-        let (samples, sample_rate) = load_mp3_file(&filename);
+        let (samples, sample_rate) = load_file(&filename, None);
 
         assert_eq!(samples.len(), 200448);
         assert_eq!(sample_rate, 48000);
@@ -97,7 +95,7 @@ mod tests {
     fn test_load_flac_file() {
         let filename = "./audio_files/flac/example.flac";
 
-        let (samples, sample_rate) = load_file(&filename);
+        let (samples, sample_rate) = load_file(&filename, None);
 
         assert_eq!(samples.len(), 93680);
         assert_eq!(sample_rate, 16000);
