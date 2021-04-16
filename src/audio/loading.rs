@@ -52,7 +52,7 @@ fn get_extension_from_filename(filename: &str) -> Option<&str> {
         .and_then(OsStr::to_str)
 }
 
-pub fn load_file<'a, 'b>(path: &'a str, format: Option<&'b str>) -> (Vec<i16>, u32) {
+pub fn load_file(path: &str, format: Option<&str>) -> (Vec<i16>, u32) {
     // let allowed_formats = vec!["wav", "mp3", "flac"];
 
     if format.is_none() {
@@ -97,7 +97,7 @@ mod tests {
     fn test_load_flac_file() {
         let filename = "./audio_files/flac/example.flac";
 
-        let (samples, sample_rate) = load_flac_file(&filename);
+        let (samples, sample_rate) = load_file(&filename);
 
         assert_eq!(samples.len(), 93680);
         assert_eq!(sample_rate, 16000);
