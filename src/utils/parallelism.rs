@@ -5,14 +5,14 @@
 use rayon::prelude::*;
 use rayon_cond::CondIterator;
 
-pub const ENV_VARIABLE: &str = "TOKENIZERS_PARALLELISM";
+pub const ENV_VARIABLE: &str = "EXTRACTORS_PARALLELISM";
 
-/// Check if the TOKENIZERS_PARALLELISM env variable has been explicitly set
+/// Check if the EXTRACTORS_PARALLELISM env variable has been explicitly set
 pub fn is_parallelism_configured() -> bool {
     std::env::var(ENV_VARIABLE).is_ok()
 }
 
-/// Get the currently set value for `TOKENIZERS_PARALLELISM` env variable
+/// Get the currently set value for `EXTRACTORS_PARALLELISM` env variable
 pub fn get_parallelism() -> bool {
     match std::env::var(ENV_VARIABLE) {
         Ok(mut v) => {
@@ -26,14 +26,14 @@ pub fn get_parallelism() -> bool {
     }
 }
 
-/// Set the value for `TOKENIZERS_PARALLELISM` for the current process
+/// Set the value for `EXTRACTORS_PARALLELISM` for the current process
 pub fn set_parallelism(val: bool) {
     std::env::set_var(ENV_VARIABLE, if val { "true" } else { "false" })
 }
 
 /// Allows to convert into an iterator that can be executed either parallelly or serially.
 ///
-/// The choice is made according to the currently set `TOKENIZERS_PARALLELISM` environment variable.
+/// The choice is made according to the currently set `EXTRACTORS_PARALLELISM` environment variable.
 /// This variable can have one of the following values
 ///   - False => "" (empty value), "false", "f", "off", "no", "n", "0"
 ///   - True => Any other value
@@ -44,10 +44,10 @@ where
     S: Iterator<Item = P::Item>,
 {
     /// Convert ourself in a CondIterator, that will be executed either in parallel or serially,
-    /// based solely on the `TOKENIZERS_PARALLELISM` environment variable
+    /// based solely on the `EXTRACTORS_PARALLELISM` environment variable
     fn into_maybe_par_iter(self) -> CondIterator<P, S>;
     /// Convert ourself in a CondIterator, that will be executed either in parallel or serially,
-    /// based on both the `TOKENIZERS_PARALLELISM` environment variable and the provided bool.
+    /// based on both the `EXTRACTORS_PARALLELISM` environment variable and the provided bool.
     /// Both must be true to run with parallelism activated.
     fn into_maybe_par_iter_cond(self, cond: bool) -> CondIterator<P, S>;
 }

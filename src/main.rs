@@ -1,10 +1,18 @@
 extern crate feature_extractor;
+use std::env;
 
-use feature_extractor::audio::loading::load_wav_file as load;
+use feature_extractor::audio::loading::batch_load_file as load;
 
 fn main() {
-    let (samples, sr) = load("./../audio_files/LJ001-0001.wav");
+    let args: Vec<String> = env::args().collect();
 
-    println!("{:?}", samples);
-    println!("{:?}", sr);
+    let file_names: Vec<&str> = args[1].split(" ").collect();
+
+    let samples = load(file_names, None);
+
+    let mut i = 1;
+    for vec in samples {
+         println!("Len {}: {}", i, vec.len());
+         i += 1;
+    }
 }

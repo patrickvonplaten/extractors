@@ -1,3 +1,5 @@
+use crate::utils::parallelism::*;
+
 use hound::WavReader;
 use minimp3::{Decoder, Frame, Error};
 use claxon::FlacReader;
@@ -65,6 +67,17 @@ pub fn load_file(path: &str, format: Option<&str>) -> (Vec<i16>, u32) {
     }
 }
 
+pub fn batch_load_file(paths: Vec<&str>, format: Option<&str>) -> Vec<Vec<i16>> {
+    let audio_vectors = paths
+        .into_maybe_par_iter()
+        .map(|input| {
+            let (samples, _) = load_file(input, format);
+            samples
+        })
+        .collect::<Vec<Vec<i16>>>();
+
+    audio_vectors
+}
 
 #[cfg(test)]
 mod tests {
