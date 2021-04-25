@@ -8,12 +8,15 @@ use std::fs::File;
 use std::path::Path;
 use std::ffi::OsStr;
 
+use std::io::BufReader;
+use rodio::Decoder as RodDecoder;
+
 
 pub fn load_wav_file(path: &str) -> (Vec<i16>, u32) {
-    let mut reader =WavReader::open(path).unwrap();
+    let mut reader = WavReader::open(path).unwrap();
 
     let sample_rate = reader.spec().sample_rate;
-    let samples = reader.samples::<i16>().map(|x| x.unwrap() as i16).collect();
+    let samples = reader.samples::<i16>().map(|x| x.unwrap()).collect();
     (samples, sample_rate)
 }
 
@@ -55,7 +58,7 @@ fn get_extension_from_filename(filename: &str) -> Option<&str> {
 }
 
 pub fn load_file(path: &str, format: Option<&str>) -> (Vec<i16>, u32) {
-    // let allowed_formats = vec!["wav", "mp3", "flac"];
+    // let allowed_formats = vec!["wav", "mp2", "flac"];
 
     let extension = if format.is_none() { get_extension_from_filename(path) } else { format };
 
@@ -65,6 +68,21 @@ pub fn load_file(path: &str, format: Option<&str>) -> (Vec<i16>, u32) {
         "flac" => load_flac_file(path),
         _ => panic!("Make sure that format or file extension is one of ['wav', 'mp3', 'flac']"),
     }
+}
+
+pub fn load_file_new(path: &str) -> Vec<i16> {
+    let file = BufReader::new(File::open(path).unwrap());
+    let samples: Vec<i16> = RodDecoder::new(file).unwrap().map(|x| x as i16).collect();
+    samples
+}
+
+pub fn batch_load_file_new(paths: Vec<&str>, format: Option<&str>) -> Vec<Vec<i16>> {
+    let audio_vectors = paths
+        .into_maybe_par_iter()
+        .map(|input| load_file_new(input))
+        .collect::<Vec<Vec<i16>>>();
+
+    audio_vectors
 }
 
 pub fn batch_load_file(paths: Vec<&str>, format: Option<&str>) -> Vec<Vec<i16>> {

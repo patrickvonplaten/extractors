@@ -12,3 +12,4 @@ rayon-cond = { verson = "*", git = "https://github.com/n1t0/rayon-cond" }
 hound = "3.4.0"
 minimp3 = "0.5"
 claxon = "0.4.3"
+rodio = "0.13.1"
