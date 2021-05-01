@@ -1,5 +1,5 @@
 [package]
-name = "feature_extractor"
+name = "extractors"
 version = "0.1.0"
 authors = ["Patrick von Platen <patrick.v.platen@gmail.com>"]
 edition = "2018"
@@ -13,3 +13,4 @@ hound = "3.4.0"
 minimp3 = "0.5"
 claxon = "0.4.3"
 rodio = "0.13.1"
+rubato = "0.8.0"

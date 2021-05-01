@@ -1,3 +1,3 @@
 //  pub mod audio;
 pub mod loading;
-// pub mod resample;
+pub mod resample;
