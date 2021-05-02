@@ -10,26 +10,26 @@ use std::path::Path;
 use std::ffi::OsStr;
 
 
-pub fn load_wav_file(path: &str) -> (Vec<f32>, u32) {
+pub fn load_wav_file(path: &str) -> (Vec<f32>, usize) {
     let mut reader = WavReader::open(path).unwrap();
 
-    let sample_rate = reader.spec().sample_rate;
+    let sample_rate = reader.spec().sample_rate as usize;
     let samples = reader.samples::<i16>().map(|x| x.unwrap() as f32).collect();
     (samples, sample_rate)
 }
 
-pub fn load_mp3_file(path: &str) -> (Vec<f32>, u32) {
+pub fn load_mp3_file(path: &str) -> (Vec<f32>, usize) {
     let mut decoder = Decoder::new(File::open(path).unwrap());
 
     // let mut samples: Option<Vec<f32>> = None;
     let mut samples = vec![];
-    let mut sampling_rate: Option<u32> = None;
+    let mut sampling_rate: Option<usize> = None;
     loop {
         match decoder.next_frame() {
             Ok(Frame { mut data, sample_rate, channels: _, .. }) => {
                 samples.append(&mut data);
 
-                sampling_rate = Some(sample_rate as u32);
+                sampling_rate = Some(sample_rate as usize);
             },
             Err(Error::Eof) => break,
             Err(e) => panic!("{:?}", e),
@@ -41,10 +41,10 @@ pub fn load_mp3_file(path: &str) -> (Vec<f32>, u32) {
     (casted_samples, sampling_rate.unwrap())
 }
 
-pub fn load_flac_file(path: &str) -> (Vec<f32>, u32) {
+pub fn load_flac_file(path: &str) -> (Vec<f32>, usize) {
     let mut reader = FlacReader::open(path).unwrap();
 
-    let sample_rate = reader.streaminfo().sample_rate;
+    let sample_rate = reader.streaminfo().sample_rate as usize;
 
     let samples = reader.samples().map(|x| x.unwrap() as f32).collect();
 
@@ -57,7 +57,7 @@ fn get_extension_from_filename(filename: &str) -> Option<&str> {
         .and_then(OsStr::to_str)
 }
 
-pub fn load_file(path: &str, to_sample_rate: Option<u32>) -> (Vec<f32>, u32) {
+pub fn load_file(path: &str, to_sample_rate: Option<usize>) -> (Vec<f32>, usize) {
     // let allowed_formats = vec!["wav", "mp2", "flac"];
 
     let extension = get_extension_from_filename(path);
@@ -70,14 +70,14 @@ pub fn load_file(path: &str, to_sample_rate: Option<u32>) -> (Vec<f32>, u32) {
     };
 
     if to_sample_rate.is_some() {
-        samples = resample(samples, to_sample_rate.unwrap(), sample_rate);
+        samples = resample(samples, to_sample_rate.unwrap() as u32, sample_rate as u32);
         sample_rate = to_sample_rate.unwrap();
     }
 
     (samples, sample_rate)
 }
 
-pub fn batch_load_file(paths: Vec<&str>, to_sample_rate: Option<u32>) -> Vec<Vec<f32>> {
+pub fn batch_load_file(paths: Vec<&str>, to_sample_rate: Option<usize>) -> Vec<Vec<f32>> {
     let audio_vectors = paths
         .into_maybe_par_iter()
         .map(|input| {
@@ -130,7 +130,7 @@ mod tests {
 
         let (samples, sample_rate) = load_file(&filename, Some(48000));
 
-        assert_eq!(samples.len(), 280654);
+        assert_eq!(samples.len(), 31227);
         assert_eq!(sample_rate, 48000);
     }
 
@@ -140,7 +140,7 @@ mod tests {
 
         let (samples, sample_rate) = load_file(&filename, Some(16000));
 
-        assert_eq!(samples.len(), 280654);
+        assert_eq!(samples.len(), 601344);
         assert_eq!(sample_rate, 16000);
     }
 }
